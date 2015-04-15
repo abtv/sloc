@@ -1,0 +1,4 @@
+[package]
+name = "sloc"
+version = "0.0.1"
+authors = ["www.github.com/abtv"]
