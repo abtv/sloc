@@ -3,40 +3,66 @@ use files::get_files;
 mod counting;
 use counting::{Stats, Counter, get_counters, get_stats};
 
-fn show_stats(stats: Stats) {
+fn show_stats(stats: &Stats) {
     println!("Total files: {}", stats.files_count);
     println!("Total loc: {}", stats.total_loc);
     println!("Empty loc: {}", stats.empty_loc);
 }
 
 fn show_counters(counters: &Vec<Counter>) {
-    let show_count = 10;
+    const SHOW_COUNT: usize = 10;
     let len = counters.len();
-    let max = if show_count > len {len} else {show_count};
-    let mut i = 0;
+    let max = if len < SHOW_COUNT {
+        len
+    }
+    else{
+        SHOW_COUNT
+    };
     if max > 0 {
         println!("{} biggest files:", max);
     }
+    let mut i = 0;
     while i < max { 
-        println!("{}. {} loc in {}", (i + 1), counters[i].total_loc, counters[i].file);
+        println!("{position}. {total_loc} loc in {file_name}",
+                 position = (i + 1),
+                 total_loc = counters[i].total_loc,
+                 file_name = counters[i].file);
         i += 1;
     } 
 }
 
 fn main() {
     println!("Source lines of code program...");
-    
+
+    //TODO Implement a producer (get_files) and a consumer (get_counters and then get_stats)
+    //in parallel, say with 2 threads
     let files = get_files(".");
     let counters = get_counters(files);
-
-    show_counters(&counters);
-
     let stats = get_stats(&counters);
-    show_stats(stats);
+    
+    show_counters(&counters);
+    show_stats(&stats);
 }
 
 #[test]
-#[ignore]
-fn it_works() {
-  assert_eq!(4, 2*2 + 1);
+fn get_files_test() {
+    assert_eq!(2, get_files("./test_data/").len());
+}
+
+#[test]
+fn get_counters_test() {
+    let files = get_files("./test_data/");
+    let counters = get_counters(files);
+    assert_eq!(2, counters.len());
+}
+
+#[test]
+fn get_stats_test(){
+    let files = get_files("./test_data/");
+    let counters = get_counters(files);
+    let stats = get_stats(&counters);
+
+    assert_eq!(2, stats.files_count);
+    assert_eq!(10, stats.total_loc);
+    assert_eq!(12, stats.empty_loc);
 }

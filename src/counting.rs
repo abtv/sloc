@@ -12,27 +12,57 @@ pub struct Stats{
     pub empty_loc: u64
 }
 
-fn get_loc(file: &str, src_txt: String) -> Counter {
+fn is_new_line_char(c: char) -> bool {
+    c == '\n'
+}
+
+fn is_empty_char(c: char) -> bool {
+    match c {
+        ' '  => true,
+        '\t' => true,
+        _    => false
+    }
+}
+
+fn get_loc(file: String, src_txt: String) -> Counter {
     let mut total_loc = 0;
     let mut empty_loc = 0;
-    let chunks = src_txt.split("\n");
-    for chunk in chunks {
-        if chunk != "" {
-            total_loc += 1;
-            let chars: Vec<char> = chunk.chars().collect();
-            if chars.len() <= 1 {
-                empty_loc += 1;
-            }
-        }
-    }
+    let v: Vec<char> = src_txt.chars().collect();
+    let len = v.len();
+    let mut empty = true;
 
-    Counter{file: file.to_string(), total_loc: total_loc, empty_loc: empty_loc}
+    let mut i = 0;
+    while i < len {
+        match v[i] {
+            c if is_new_line_char(c) && empty  => {
+                empty_loc += 1;
+                empty = true;
+            },
+            c if is_new_line_char(c) && !empty => {
+                total_loc += 1;
+                empty = true;
+            },
+            c if !is_empty_char(c) => empty = false,
+            _                      => ()
+        };
+
+        i += 1;
+    }
+    if (len > 0) && empty {
+        empty_loc += 1;
+    }
+    
+    Counter {
+        file: file,
+        total_loc: total_loc,
+        empty_loc: empty_loc
+    }
 }
 
 fn get_file_loc(file_name: &str) -> Option<Counter> {
     let src_txt = read_file(file_name);
     match src_txt {
-        Some(s) => Some(get_loc(file_name, s)),
+        Some(s) => Some(get_loc(file_name.to_string(), s)),
         None    => None
     }
 }
@@ -53,15 +83,17 @@ pub fn get_counters(files: Vec<String>) -> Vec<Counter> {
 }
 
 pub fn get_stats(counters: &Vec<Counter>) -> Stats {
-    let mut files_count = 0;
-    let mut total_loc = 0;
-    let mut empty_loc = 0;
+    let mut stats = Stats{
+        files_count: 0,
+        total_loc: 0,
+        empty_loc: 0
+    };
 
     for counter in counters {
-        files_count += 1;
-        total_loc += counter.total_loc;
-        empty_loc += counter.empty_loc;
+        stats.files_count += 1;
+        stats.total_loc += counter.total_loc;
+        stats.empty_loc += counter.empty_loc;
     }
 
-    Stats{files_count: files_count, total_loc: total_loc, empty_loc: empty_loc}
+    stats
 }
