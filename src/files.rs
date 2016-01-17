@@ -29,9 +29,7 @@ fn get_path(pb: PathBuf) -> String {
     }.to_string()
 }
 
-pub fn get_files(folder: &str) -> Vec<String> {
-    let mut files = Vec::new();
-
+pub fn get_files(folder: &str, files: &mut Vec<String>) {
     match read_dir(&Path::new(&folder)) {
         Err(_)    => (),
         Ok(paths) => for path in paths {
@@ -40,14 +38,9 @@ pub fn get_files(folder: &str) -> Vec<String> {
                 files.push(file.clone());
             }
 
-            let sub_files = get_files(&file);
-            for sf in sub_files {
-                files.push(sf);
-            }
+            get_files(&file, files);
         }
     }
-
-    files
 }
 
 pub fn read_file(file_name: &str) -> Option<String> {

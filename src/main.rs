@@ -36,7 +36,8 @@ fn main() {
 
     //TODO Implement a producer (get_files) and a consumer (get_counters and then get_stats)
     //in parallel, say with 2 threads
-    let files = get_files(".");
+    let mut files: Vec<String> = Vec::new();
+    get_files(".", &mut files);
     let counters = get_counters(files);
     let stats = get_stats(&counters);
     
@@ -46,19 +47,23 @@ fn main() {
 
 #[test]
 fn get_files_test() {
-    assert_eq!(2, get_files("./test_data/").len());
+    let mut files: Vec<String> = Vec::new();
+    get_files("./test_data/", &mut files);
+    assert_eq!(2, files.len());
 }
 
 #[test]
 fn get_counters_test() {
-    let files = get_files("./test_data/");
+    let mut files: Vec<String> = Vec::new();
+    get_files("./test_data/", &mut files);
     let counters = get_counters(files);
     assert_eq!(2, counters.len());
 }
 
 #[test]
 fn get_stats_test(){
-    let files = get_files("./test_data/");
+    let mut files: Vec<String> = Vec::new();
+    get_files("./test_data/", &mut files); 
     let counters = get_counters(files);
     let stats = get_stats(&counters);
 
